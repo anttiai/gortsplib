@@ -1725,6 +1725,15 @@ func TestClientRecordRTCPReport(t *testing.T) {
 						PacketCount: 1,
 						OctetCount:  1,
 					},
+					&rtcp.SourceDescription{
+						Chunks: []rtcp.SourceDescriptionChunk{{
+							Source: packets[0].(*rtcp.SenderReport).SSRC,
+							Items: []rtcp.SourceDescriptionItem{{
+								Type: rtcp.SDESCNAME,
+								Text: packets[1].(*rtcp.SourceDescription).Chunks[0].Items[0].Text,
+							}},
+						}},
+					},
 				}, packets)
 
 				close(report1Received)
@@ -1739,6 +1748,15 @@ func TestClientRecordRTCPReport(t *testing.T) {
 						RTPTime:     1300000 + 60*90000,
 						PacketCount: 1,
 						OctetCount:  1,
+					},
+					&rtcp.SourceDescription{
+						Chunks: []rtcp.SourceDescriptionChunk{{
+							Source: packets[0].(*rtcp.SenderReport).SSRC,
+							Items: []rtcp.SourceDescriptionItem{{
+								Type: rtcp.SDESCNAME,
+								Text: packets[1].(*rtcp.SourceDescription).Chunks[0].Items[0].Text,
+							}},
+						}},
 					},
 				}, packets)
 

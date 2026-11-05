@@ -21,6 +21,7 @@ type Sender struct {
 	Period          time.Duration
 	TimeNow         func() time.Time
 	WritePacketRTCP func(rtcp.Packet)
+	CNAME           string
 
 	mutex sync.RWMutex
 
@@ -98,12 +99,29 @@ func (rs *Sender) report() rtcp.Packet {
 	ntpTime := rs.lastNTP.Add(systemDiff)
 	rtpTime := rs.lastRTP + uint32(systemDiff.Seconds()*float64(rs.ClockRate))
 
-	return &rtcp.SenderReport{
+	sr := &rtcp.SenderReport{
 		SSRC:        rs.localSSRC,
 		NTPTime:     ntp.Encode(ntpTime),
 		RTPTime:     rtpTime,
 		PacketCount: uint32(rs.sent),
 		OctetCount:  rs.octetCount,
+	}
+
+	if rs.CNAME == "" {
+		return sr
+	}
+
+	return &rtcp.CompoundPacket{
+		sr,
+		&rtcp.SourceDescription{
+			Chunks: []rtcp.SourceDescriptionChunk{{
+				Source: rs.localSSRC,
+				Items: []rtcp.SourceDescriptionItem{{
+					Type: rtcp.SDESCNAME,
+					Text: rs.CNAME,
+				}},
+			}},
+		},
 	}
 }
 

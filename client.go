@@ -20,6 +20,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 	"github.com/pion/sdp/v3"
@@ -579,6 +580,7 @@ type Client struct {
 	//
 
 	timeNow              func() time.Time
+	cname                string
 	senderReportPeriod   time.Duration
 	receiverReportPeriod time.Duration
 	checkTimeoutPeriod   time.Duration
@@ -722,6 +724,7 @@ func (c *Client) Start() error {
 	if c.timeNow == nil {
 		c.timeNow = time.Now
 	}
+	c.cname = uuid.New().String()
 	if c.senderReportPeriod == 0 {
 		c.senderReportPeriod = 10 * time.Second
 	}

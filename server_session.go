@@ -310,6 +310,7 @@ type ServerSession struct {
 	author *ServerConn
 
 	secretID              string // must not be shared, allows to take ownership of the session
+	cname                 string
 	ctx                   context.Context
 	ctxCancel             func()
 	propsMutex            sync.RWMutex
@@ -348,6 +349,7 @@ func (ss *ServerSession) initialize() {
 	secretID := strings.ReplaceAll(uuid.New().String(), "-", "")
 
 	ss.secretID = secretID
+	ss.cname = uuid.New().String()
 	ss.ctx = ctx
 	ss.ctxCancel = ctxCancel
 	ss.conns = make(map[*ServerConn]struct{})

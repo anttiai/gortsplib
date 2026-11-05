@@ -4415,13 +4415,24 @@ func TestClientPlayBackChannel(t *testing.T) {
 				packets, err2 := rtcp.Unmarshal(pl)
 				require.NoError(t, err2)
 
-				require.Equal(t, []rtcp.Packet{&rtcp.SenderReport{
-					SSRC:        packets[0].(*rtcp.SenderReport).SSRC,
-					NTPTime:     packets[0].(*rtcp.SenderReport).NTPTime,
-					RTPTime:     packets[0].(*rtcp.SenderReport).RTPTime,
-					PacketCount: 1,
-					OctetCount:  4,
-				}}, packets)
+				require.Equal(t, []rtcp.Packet{
+					&rtcp.SenderReport{
+						SSRC:        packets[0].(*rtcp.SenderReport).SSRC,
+						NTPTime:     packets[0].(*rtcp.SenderReport).NTPTime,
+						RTPTime:     packets[0].(*rtcp.SenderReport).RTPTime,
+						PacketCount: 1,
+						OctetCount:  4,
+					},
+					&rtcp.SourceDescription{
+						Chunks: []rtcp.SourceDescriptionChunk{{
+							Source: packets[0].(*rtcp.SenderReport).SSRC,
+							Items: []rtcp.SourceDescriptionItem{{
+								Type: rtcp.SDESCNAME,
+								Text: packets[1].(*rtcp.SourceDescription).Chunks[0].Items[0].Text,
+							}},
+						}},
+					},
+				}, packets)
 
 				// client -> server RTCP receiver report (UDP only)
 

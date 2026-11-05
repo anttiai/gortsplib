@@ -13,6 +13,7 @@ import (
 
 type serverMulticastWriterFormat struct {
 	senderReportPeriod       time.Duration
+	cname                    string
 	timeNow                  func() time.Time
 	disableRTCPSenderReports bool
 	smm                      *serverMulticastWriterMedia
@@ -26,6 +27,7 @@ func (smf *serverMulticastWriterFormat) initialize() {
 		ClockRate: smf.format.ClockRate(),
 		Period:    smf.senderReportPeriod,
 		TimeNow:   smf.timeNow,
+		CNAME:     smf.cname,
 		WritePacketRTCP: func(pkt rtcp.Packet) {
 			if !smf.disableRTCPSenderReports {
 				smf.smm.writePacketRTCP(pkt) //nolint:errcheck

@@ -61,6 +61,7 @@ func (ssf *serverSessionFormat) initialize() {
 			ClockRate: ssf.format.ClockRate(),
 			Period:    ssf.ssm.ss.s.senderReportPeriod,
 			TimeNow:   ssf.ssm.ss.s.timeNow,
+			CNAME:     ssf.ssm.ss.cname,
 			WritePacketRTCP: func(pkt rtcp.Packet) {
 				if !ssf.ssm.ss.s.DisableRTCPSenderReports {
 					ssf.ssm.writePacketRTCP(pkt) //nolint:errcheck

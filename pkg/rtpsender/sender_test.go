@@ -246,3 +246,55 @@ func TestSenderInitialReportBeatsPeriod(t *testing.T) {
 		t.Fatal("no sender report within 2s despite a packet having been sent")
 	}
 }
+
+func TestSenderCNAME(t *testing.T) {
+	pktGenerated := make(chan rtcp.Packet)
+
+	rs := &Sender{
+		ClockRate: 90000,
+		Period:    100 * time.Millisecond,
+		TimeNow: func() time.Time {
+			return time.Date(2008, 5, 20, 22, 16, 20, 0, time.UTC)
+		},
+		WritePacketRTCP: func(pkt rtcp.Packet) {
+			pktGenerated <- pkt
+		},
+		CNAME: "mycname",
+	}
+	rs.Initialize()
+	defer rs.Close()
+
+	rs.ProcessPacket(&rtp.Packet{
+		Header: rtp.Header{
+			Version:        2,
+			PayloadType:    96,
+			SequenceNumber: 946,
+			Timestamp:      1287987768,
+			SSRC:           0xba9da416,
+		},
+		Payload: []byte("\x00\x00"),
+	}, time.Date(2008, 5, 20, 22, 15, 20, 0, time.UTC), true)
+
+	pkt := <-pktGenerated
+
+	// the report is a RFC 3550 compound packet with the CNAME of the sender
+	cpkt, ok := pkt.(*rtcp.CompoundPacket)
+	require.True(t, ok)
+	require.NoError(t, cpkt.Validate())
+
+	cname, err := cpkt.CNAME()
+	require.NoError(t, err)
+	require.Equal(t, "mycname", cname)
+
+	sr, ok := (*cpkt)[0].(*rtcp.SenderReport)
+	require.True(t, ok)
+	require.Equal(t, uint32(0xba9da416), sr.SSRC)
+	require.Equal(t, uint32(0xba9da416), (*cpkt)[1].(*rtcp.SourceDescription).Chunks[0].Source)
+
+	// it survives a round trip
+	buf, err := pkt.Marshal()
+	require.NoError(t, err)
+	packets, err := rtcp.Unmarshal(buf)
+	require.NoError(t, err)
+	require.Len(t, packets, 2)
+}

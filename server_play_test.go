@@ -1604,6 +1604,15 @@ func TestServerPlayRTCPReport(t *testing.T) {
 					PacketCount: 1,
 					OctetCount:  1,
 				},
+				&rtcp.SourceDescription{
+					Chunks: []rtcp.SourceDescriptionChunk{{
+						Source: packets[0].(*rtcp.SenderReport).SSRC,
+						Items: []rtcp.SourceDescriptionItem{{
+							Type: rtcp.SDESCNAME,
+							Text: packets[1].(*rtcp.SourceDescription).Chunks[0].Items[0].Text,
+						}},
+					}},
+				},
 			}, packets)
 
 			curTimeMutex.Lock()
@@ -1636,6 +1645,15 @@ func TestServerPlayRTCPReport(t *testing.T) {
 					RTPTime:     240000 + 90000*30,
 					PacketCount: 1,
 					OctetCount:  1,
+				},
+				&rtcp.SourceDescription{
+					Chunks: []rtcp.SourceDescriptionChunk{{
+						Source: packets[0].(*rtcp.SenderReport).SSRC,
+						Items: []rtcp.SourceDescriptionItem{{
+							Type: rtcp.SDESCNAME,
+							Text: packets[1].(*rtcp.SourceDescription).Chunks[0].Items[0].Text,
+						}},
+					}},
 				},
 			}, packets)
 

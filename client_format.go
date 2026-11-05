@@ -40,6 +40,7 @@ func (cf *clientFormat) initialize() {
 			ClockRate: cf.format.ClockRate(),
 			Period:    cf.cm.c.senderReportPeriod,
 			TimeNow:   cf.cm.c.timeNow,
+			CNAME:     cf.cm.c.cname,
 			WritePacketRTCP: func(pkt rtcp.Packet) {
 				if !cf.cm.c.DisableRTCPSenderReports {
 					cf.cm.c.WritePacketRTCP(cf.cm.media, pkt) //nolint:errcheck

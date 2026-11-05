@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 
@@ -71,6 +72,7 @@ type ServerStream struct {
 	activeUnicastReaders map[*ServerSession]struct{}
 	medias               map[*description.Media]*serverStreamMedia
 	closed               bool
+	cname                string
 }
 
 // Initialize initializes a ServerStream.
@@ -79,6 +81,7 @@ func (st *ServerStream) Initialize() error {
 		return fmt.Errorf("server not present or not initialized")
 	}
 
+	st.cname = uuid.New().String()
 	st.readers = make(map[*ServerSession]struct{})
 	st.activeUnicastReaders = make(map[*ServerSession]struct{})
 
@@ -319,6 +322,7 @@ func (st *ServerStream) readerAdd(
 				for _, ssf := range ssm.formats {
 					smf := &serverMulticastWriterFormat{
 						senderReportPeriod:       st.Server.senderReportPeriod,
+						cname:                    st.cname,
 						timeNow:                  st.Server.timeNow,
 						disableRTCPSenderReports: st.Server.DisableRTCPSenderReports,
 						smm:                      smm,
